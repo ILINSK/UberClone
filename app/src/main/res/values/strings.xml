@@ -2,4 +2,9 @@
     <string name="app_name">UberClone</string>
     <string name="sign_in_phone">Вход по номеру телефона</string>
     <string name="sign_in_google">Вход через google</string>
+    <string name="continue_text">Продолжить</string>
+    <string name="register_text">Давайте начнем с создания вашего аккаунта</string>
+    <string name="firts_name">Имя</string>
+    <string name="last_name">Фамилия</string>
+    <string name="phone_number">Номер телефона</string>
 </resources>
