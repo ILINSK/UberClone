@@ -21,7 +21,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Completable
-import kotlinx.android.synthetic.main.activity_splash_screen.*
+
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -99,7 +99,9 @@ class SplashScreen : AppCompatActivity() {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     if (dataSnapshot.exists())
                     {
-                        Toast.makeText(this@SplashScreen,"Пользователь уже зарегистрирован!", Toast.LENGTH_SHORT).show()
+                        //Toast.makeText(this@SplashScreen,"Пользователь уже зарегистрирован!", Toast.LENGTH_SHORT).show()
+                        val model = dataSnapshot.getValue(DriverInfoModel::class.java)
+                        goToHomeActivity(model)
                     }
                     else
                     {
@@ -109,6 +111,12 @@ class SplashScreen : AppCompatActivity() {
 
 
             })
+    }
+
+    private fun goToHomeActivity(model: DriverInfoModel?) {
+        Common.currentUser = model
+        startActivity(Intent(this,DriverHomeActivity::class.java))
+        finish()
     }
 
     private fun showRegisterLayout() {
@@ -162,12 +170,15 @@ class SplashScreen : AppCompatActivity() {
                     .addOnFailureListener { e ->
                         Toast.makeText(this, ""+e.message, Toast.LENGTH_SHORT).show()
                         dialog.dismiss()
-                        progress_bar.visibility = View.GONE
+
                     }
                     .addOnSuccessListener {
                         Toast.makeText(this, "Регистрация прошла успешно", Toast.LENGTH_SHORT).show()
                         dialog.dismiss()
-                        progress_bar.visibility = View.GONE
+
+                        goToHomeActivity(model)
+
+
                     }
             }
         }

@@ -18,7 +18,7 @@
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowBackground">@drawable/rider_splash_screen</item>
     </style>
-    
+
     <style name="LoginTheme" parent="FirebaseUI">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -50,4 +50,13 @@
         <item name="android:windowIsFloating">false</item>
 
     </style>
+
+    <style name="Theme.UberClone.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.UberClone.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.UberClone.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>
