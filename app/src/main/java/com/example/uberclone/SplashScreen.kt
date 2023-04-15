@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
@@ -11,6 +12,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.uberclone.Model.DriverInfoModel
+import com.example.uberclone.Utils.UserUtils
 import com.firebase.ui.auth.AuthMethodPickerLayout
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.AuthUI.IdpConfig.GoogleBuilder
@@ -19,6 +21,8 @@ import com.firebase.ui.auth.IdpResponse
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.google.firebase.installations.FirebaseInstallations
+import com.google.firebase.installations.InstallationTokenResult
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Completable
 
@@ -38,6 +42,8 @@ class SplashScreen : AppCompatActivity() {
 
     private lateinit var database:FirebaseDatabase
     private lateinit var driverInfoRef:DatabaseReference
+
+
 
     override fun onStart() {
         super.onStart()
@@ -80,6 +86,18 @@ class SplashScreen : AppCompatActivity() {
             val user = myFirebaseAuth.currentUser
             if (user != null)
             {
+                val firebaseInstallations = FirebaseInstallations.getInstance()
+                firebaseInstallations.getToken(/*forceRefresh=*/false)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val token = task.result.token
+                            Log.d("TOKEN", token)
+                            UserUtils.updateToken(this@SplashScreen, token)
+                        } else {
+                            val exception = task.exception
+                            Toast.makeText(this@SplashScreen, exception?.message, Toast.LENGTH_LONG).show()
+                        }
+                    }
                 checkUserFromFirebase()
             }else{
                 showLoginLayout()
@@ -105,6 +123,7 @@ class SplashScreen : AppCompatActivity() {
                     }
                     else
                     {
+
                         showRegisterLayout()
                     }
                 }
