@@ -3,6 +3,7 @@ package com.example.uberclone.ui.home
 import android.Manifest
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.location.Location
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -14,9 +15,13 @@ import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.uberclone.Common
 import com.example.uberclone.R
 import com.example.uberclone.databinding.FragmentHomeBinding
+import com.firebase.geofire.GeoFire
+import com.firebase.geofire.GeoLocation
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LastLocationRequest
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -29,6 +34,12 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -47,9 +58,39 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     lateinit var locationCallback: LocationCallback
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
+    //Online system
+    private lateinit var onlineRef:DatabaseReference
+    private lateinit var currentUserRef:DatabaseReference
+    private lateinit var driversLocationRef:DatabaseReference
+    private lateinit var geoFire:GeoFire
+
+    private val onlineValueEventListener = object:ValueEventListener{
+        override fun onCancelled(p0: DatabaseError) {
+            Snackbar.make(mapFragment.requireView(),p0.message, Snackbar.LENGTH_LONG).show()
+        }
+
+        override fun onDataChange(p0: DataSnapshot) {
+            if (p0.exists()){
+                currentUserRef.onDisconnect().removeValue()
+            }
+        }
+
+    }
+
     override fun onDestroy() {
         fusedLocationProviderClient.removeLocationUpdates(locationCallback)
+        geoFire.removeLocation(FirebaseAuth.getInstance().currentUser!!.uid)
+        onlineRef.removeEventListener(onlineValueEventListener)
         super.onDestroy()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        registerOnlineSystem()
+    }
+
+    private fun registerOnlineSystem() {
+        onlineRef.addValueEventListener(onlineValueEventListener)
     }
 
 
@@ -76,6 +117,16 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun init() {
+        onlineRef = FirebaseDatabase.getInstance().getReference().child(".info/connected")
+        driversLocationRef = FirebaseDatabase.getInstance().getReference(Common.DRIVERS_LOCATION_REFERENCE)
+        currentUserRef = FirebaseDatabase.getInstance().getReference(Common.DRIVERS_LOCATION_REFERENCE).child(
+            FirebaseAuth.getInstance().currentUser!!.uid
+        )
+
+        geoFire = GeoFire(driversLocationRef)
+
+        registerOnlineSystem()
+
         locationRequest = LocationRequest()
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
         locationRequest.setFastestInterval(3000)
@@ -88,6 +139,18 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 super.onLocationResult(p0)
                 val newPos = LatLng(p0.lastLocation!!.latitude,p0.lastLocation!!.longitude)
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newPos,18f))
+
+                //Update Location
+                geoFire.setLocation(
+                    FirebaseAuth.getInstance().currentUser!!.uid,
+                    GeoLocation(p0.lastLocation!!.latitude,p0.lastLocation!!.longitude)
+                ){key:String?, error:DatabaseError? ->
+                    if (error != null)
+                        Snackbar.make(mapFragment.requireView(),error.message,Snackbar.LENGTH_LONG).show()
+                    else
+                        Snackbar.make(mapFragment.requireView(),"You're online!",Snackbar.LENGTH_SHORT).show()
+                }
+
             }
         }
 

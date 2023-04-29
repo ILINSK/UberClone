@@ -41,7 +41,7 @@ android {
 dependencies {
 
     implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.appcompat:appcompat:1.6.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1'
@@ -78,4 +78,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging-ktx:23.1.2'
     //Firebase Installations
     implementation 'com.google.firebase:firebase-installations:17.0.0'
+    //GeoFire
+    implementation 'com.firebase:geofire-android:3.2.0'
+    implementation 'com.firebase:geofire-android-common:3.2.0'
 }
