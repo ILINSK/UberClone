@@ -112,10 +112,12 @@ class DriverHomeActivity : AppCompatActivity() {
         val headerView = binding.navView.getHeaderView(0)
         val txt_name = headerView.findViewById<View>(R.id.txt_name) as TextView
         val txt_phone = headerView.findViewById<View>(R.id.txt_phone) as TextView
+        val txt_star = headerView.findViewById<View>(R.id.txt_star) as TextView
 
         img_avatar = headerView.findViewById(R.id.img_avatar) as ImageView
         txt_name.text = Common.buildWelcomeMessage()
         txt_phone.text = Common.currentUser!!.phoneNumber
+        txt_star.text = StringBuilder().append(Common.currentUser!!.rating)
 
         if (Common.currentUser != null && Common.currentUser!!.avatar != null && !TextUtils.isEmpty(Common.currentUser!!.avatar))
         {
